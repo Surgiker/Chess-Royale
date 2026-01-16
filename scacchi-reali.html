@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scacchi Reali</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Spectral:wght@300;400;500&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --wood-dark: #5c4033;
+            --wood-light: #8b7355;
+            --cream: #f5f0e6;
+            --parchment: #e8e0d0;
+            --ink: #2c2416;
+            --gold: #c9a227;
+            --gold-dim: #8b7355;
+            --square-light: #e8d4b8;
+            --square-dark: #b58863;
+            --highlight: rgba(201, 162, 39, 0.5);
+        }
+        
+        body {
+            font-family: 'Spectral', Georgia, serif;
+            background: var(--parchment);
+            min-height: 100vh;
+            color: var(--ink);
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        
+        h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 2.5rem;
+            text-align: center;
+            color: var(--wood-dark);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-style: italic;
+            color: var(--wood-light);
+            margin-bottom: 2rem;
+        }
+        
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        /* SETUP */
+        .setup-panel {
+            background: var(--cream);
+            border: 2px solid var(--wood-light);
+            padding: 2rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .setup-section { margin-bottom: 1.5rem; }
+        .setup-section h2 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            margin-bottom: 1rem;
+            color: var(--wood-dark);
+            border-bottom: 1px solid var(--gold-dim);
+            padding-bottom: 0.5rem;
+        }
+        
+        .player-setup { display: flex; justify-content: space-between; gap: 2rem; }
+        .player-config { flex: 1; text-align: center; }
+        .player-config h3 { margin-bottom: 0.5rem; }
+        
+        .player-type-select { display: flex; gap: 0.5rem; justify-content: center; }
+        .player-type-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--wood-light);
+            background: var(--parchment);
+            cursor: pointer;
+        }
+        .player-type-btn:hover { background: var(--wood-light); color: var(--cream); }
+        .player-type-btn.selected { background: var(--wood-dark); color: var(--cream); }
+        
+        .speed-options { display: flex; flex-direction: column; gap: 0.5rem; }
+        .speed-option { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: var(--wood-dark);
+            color: var(--cream);
+            border: none;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .btn-primary:hover { background: var(--gold); color: var(--ink); }
+        
+        /* ARMY SELECTION */
+        .army-selection { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+        .army-panel {
+            background: var(--cream);
+            border: 2px solid var(--wood-light);
+            padding: 1.5rem;
+            width: 400px;
+        }
+        .army-panel.hidden-selection { position: relative; }
+        .army-panel.hidden-selection::after {
+            content: "Selezione in corso...";
+            position: absolute;
+            inset: 0;
+            background: var(--parchment);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: var(--wood-light);
+        }
+        .army-panel h3 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--wood-dark);
+        }
+        
+        .budget-display {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: var(--parchment);
+        }
+        .budget-item { text-align: center; }
+        .budget-item .label { font-size: 0.8rem; color: var(--wood-light); }
+        .budget-item .value { font-size: 1.5rem; font-weight: bold; color: var(--wood-dark); }
+        
+        .piece-cart {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: var(--parchment);
+            border-radius: 4px;
+        }
+        .cart-item .piece-icon { font-size: 2rem; width: 40px; text-align: center; }
+        .cart-item .piece-name { flex: 1; font-size: 0.9rem; }
+        .cart-item .piece-cost { color: var(--wood-light); font-size: 0.8rem; margin-right: 0.5rem; }
+        .cart-item .qty-controls { display: flex; align-items: center; gap: 0.25rem; }
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--wood-light);
+            background: var(--cream);
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qty-btn:hover:not(:disabled) { background: var(--wood-light); color: var(--cream); }
+        .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .qty-value {
+            width: 32px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .cart-summary {
+            padding: 0.75rem;
+            background: rgba(201, 162, 39, 0.15);
+            border: 1px solid var(--gold);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        .cart-summary .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        .cart-summary .summary-row.total {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--gold-dim);
+            font-weight: bold;
+        }
+        
+        .army-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .btn-secondary {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--wood-light);
+            background: var(--parchment);
+            cursor: pointer;
+        }
+        .btn-secondary:hover { background: var(--wood-light); color: var(--cream); }
+        .btn-confirm {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            background: var(--gold);
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-confirm:hover { background: var(--wood-dark); color: var(--cream); }
+        .btn-confirm:disabled { background: var(--gold-dim); cursor: not-allowed; }
+        
+        .status-message { text-align: center; padding: 1rem; font-style: italic; color: var(--wood-light); }
+        
+        /* POSITIONING */
+        .positioning-area { display: flex; gap: 2rem; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+        .pieces-tray {
+            background: var(--cream);
+            border: 2px solid var(--wood-light);
+            padding: 1rem;
+            min-width: 150px;
+        }
+        .pieces-tray h3 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--wood-dark);
+        }
+        .tray-pieces { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+        .tray-piece {
+            font-size: 2rem;
+            padding: 0.25rem;
+            cursor: grab;
+            border-radius: 4px;
+        }
+        .tray-piece:hover { background: var(--highlight); }
+        .tray-piece.selected { background: var(--highlight); box-shadow: 0 0 8px var(--gold); }
+        .tray-piece.dragging { opacity: 0.4; }
+        
+        /* CHESSBOARD */
+        .board-container { display: flex; flex-direction: column; align-items: center; }
+        .board-frame {
+            background: var(--wood-dark);
+            padding: 0.75rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+        }
+        .square {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            position: relative;
+        }
+        .square.light { background-color: #e8d4b8; }
+        .square.dark { background-color: #b58863; }
+        .square.highlight { background-color: #d4c463 !important; }
+        .square.selected { background-color: #c9a227 !important; box-shadow: inset 0 0 0 3px #8b6914; }
+        .square.drag-over { background-color: #c9a227 !important; }
+        .square.valid-move::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+        }
+        .square.last-move { background-color: #cdd26a !important; }
+        .square.check { background-color: #e77 !important; }
+        
+        .square .piece { cursor: grab; }
+        .square .piece.dragging { opacity: 0.4; }
+        
+        .row-label, .col-label {
+            position: absolute;
+            font-size: 0.6rem;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+        .row-label { left: 2px; bottom: 2px; }
+        .col-label { right: 2px; top: 2px; }
+        .square.light .row-label, .square.light .col-label { color: #b58863; }
+        .square.dark .row-label, .square.dark .col-label { color: #e8d4b8; }
+        
+        .game-controls { display: flex; gap: 1rem; margin-top: 1rem; justify-content: center; }
+        .control-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--wood-light);
+            background: var(--cream);
+            cursor: pointer;
+        }
+        .control-btn:hover { background: var(--wood-dark); color: var(--cream); }
+        
+        /* GAME INFO */
+        .game-info {
+            background: var(--cream);
+            border: 2px solid var(--wood-light);
+            padding: 1rem;
+            min-width: 180px;
+        }
+        .turn-indicator {
+            text-align: center;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gold-dim);
+        }
+        .captured-pieces { margin-top: 0.5rem; }
+        .captured-pieces h4 { font-size: 0.8rem; color: var(--wood-light); margin-bottom: 0.25rem; }
+        .captured-list { display: flex; flex-wrap: wrap; gap: 0.1rem; font-size: 1rem; min-height: 1.2rem; }
+        
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--cream);
+            border: 3px solid var(--gold);
+            padding: 2rem;
+            text-align: center;
+        }
+        .modal h2 { font-family: 'Cormorant Garamond', Georgia, serif; margin-bottom: 1rem; color: var(--wood-dark); }
+        .modal p { margin-bottom: 1.5rem; }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--gold-dim);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scacchi Reali</h1>
+        <p class="subtitle">Componi il tuo esercito, conquista il regno</p>
+        
+        <!-- SETUP SCREEN -->
+        <div id="setup-screen" class="screen active">
+            <div class="setup-panel">
+                <div class="setup-section">
+                    <h2>Giocatori</h2>
+                    <div class="player-setup">
+                        <div class="player-config">
+                            <h3>♔ Bianco</h3>
+                            <div class="player-type-select">
+                                <button class="player-type-btn selected" data-player="white" data-type="human">Umano</button>
+                                <button class="player-type-btn" data-player="white" data-type="ai">IA</button>
+                            </div>
+                        </div>
+                        <div class="player-config">
+                            <h3>♚ Nero</h3>
+                            <div class="player-type-select">
+                                <button class="player-type-btn" data-player="black" data-type="human">Umano</button>
+                                <button class="player-type-btn selected" data-player="black" data-type="ai">IA</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setup-section">
+                    <h2>Velocità IA</h2>
+                    <div class="speed-options">
+                        <label class="speed-option">
+                            <input type="radio" name="speed" value="instant"> Istantanea
+                        </label>
+                        <label class="speed-option">
+                            <input type="radio" name="speed" value="step" checked> Passo-passo
+                        </label>
+                        <label class="speed-option">
+                            <input type="radio" name="speed" value="timed"> 1 secondo/mossa
+                        </label>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" id="start-game">Inizia Partita</button>
+            </div>
+        </div>
+        
+        <!-- ARMY SELECTION SCREEN -->
+        <div id="army-screen" class="screen">
+            <div class="army-selection">
+                <div class="army-panel" id="white-army-panel">
+                    <h3>♔ Esercito Bianco</h3>
+                    <div class="piece-cart" id="white-cart">
+                        <div class="cart-item" data-piece="q">
+                            <span class="piece-icon">♕</span>
+                            <span class="piece-name">Donna</span>
+                            <span class="piece-cost">9 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="r">
+                            <span class="piece-icon">♖</span>
+                            <span class="piece-name">Torre</span>
+                            <span class="piece-cost">5 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="b">
+                            <span class="piece-icon">♗</span>
+                            <span class="piece-name">Alfiere</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="n">
+                            <span class="piece-icon">♘</span>
+                            <span class="piece-name">Cavallo</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="p">
+                            <span class="piece-icon">♙</span>
+                            <span class="piece-name">Pedone</span>
+                            <span class="piece-cost">1 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-summary" id="white-summary">
+                        <div class="summary-row">
+                            <span>Pezzi:</span>
+                            <span><span id="white-pieces-count">0</span> / 15</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Punti usati:</span>
+                            <span><span id="white-points-used">0</span> / 39</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Re (incluso):</span>
+                            <span>♔</span>
+                        </div>
+                    </div>
+                    <div class="army-actions">
+                        <button class="btn-secondary" id="white-classic">Classico</button>
+                        <button class="btn-secondary" id="white-clear">Svuota</button>
+                        <button class="btn-confirm" id="white-confirm">Conferma</button>
+                    </div>
+                </div>
+                
+                <div class="army-panel" id="black-army-panel">
+                    <h3>♚ Esercito Nero</h3>
+                    <div class="piece-cart" id="black-cart">
+                        <div class="cart-item" data-piece="q">
+                            <span class="piece-icon">♛</span>
+                            <span class="piece-name">Donna</span>
+                            <span class="piece-cost">9 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="r">
+                            <span class="piece-icon">♜</span>
+                            <span class="piece-name">Torre</span>
+                            <span class="piece-cost">5 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="b">
+                            <span class="piece-icon">♝</span>
+                            <span class="piece-name">Alfiere</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="n">
+                            <span class="piece-icon">♞</span>
+                            <span class="piece-name">Cavallo</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="p">
+                            <span class="piece-icon">♟</span>
+                            <span class="piece-name">Pedone</span>
+                            <span class="piece-cost">1 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-summary" id="black-summary">
+                        <div class="summary-row">
+                            <span>Pezzi:</span>
+                            <span><span id="black-pieces-count">0</span> / 15</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Punti usati:</span>
+                            <span><span id="black-points-used">0</span> / 39</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Re (incluso):</span>
+                            <span>♚</span>
+                        </div>
+                    </div>
+                    <div class="army-actions">
+                        <button class="btn-secondary" id="black-classic">Classico</button>
+                        <button class="btn-secondary" id="black-clear">Svuota</button>
+                        <button class="btn-confirm" id="black-confirm">Conferma</button>
+                    </div>
+                </div>
+            </div>
+            <p class="status-message" id="army-status"></p>
+        </div>
+        
+        <!-- POSITIONING SCREEN -->
+        <div id="positioning-screen" class="screen">
+            <p class="status-message" id="positioning-status">Posiziona i tuoi pezzi nelle prime due righe</p>
+            <div class="positioning-area">
+                <div class="pieces-tray" id="white-tray">
+                    <h3>♔ Bianchi</h3>
+                    <div class="tray-pieces" id="white-tray-pieces"></div>
+                </div>
+                
+                <div class="board-container">
+                    <div class="board-frame">
+                        <div class="chessboard" id="positioning-board"></div>
+                    </div>
+                    <div class="game-controls">
+                        <button class="control-btn" id="auto-position">Auto</button>
+                        <button class="control-btn" id="confirm-position">Conferma</button>
+                    </div>
+                </div>
+                
+                <div class="pieces-tray" id="black-tray">
+                    <h3>♚ Neri</h3>
+                    <div class="tray-pieces" id="black-tray-pieces"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="screen">
+            <div class="positioning-area">
+                <div class="game-info">
+                    <div class="turn-indicator" id="turn-indicator">Turno: Bianco</div>
+                    <div class="captured-pieces">
+                        <h4>Catturati dal Bianco:</h4>
+                        <div class="captured-list" id="white-captured"></div>
+                    </div>
+                    <div class="captured-pieces">
+                        <h4>Catturati dal Nero:</h4>
+                        <div class="captured-list" id="black-captured"></div>
+                    </div>
+                </div>
+                
+                <div class="board-container">
+                    <div class="board-frame">
+                        <div class="chessboard" id="game-board"></div>
+                    </div>
+                    <div class="game-controls" id="game-controls">
+                        <button class="control-btn" id="next-move" style="display:none;">Prossima Mossa</button>
+                        <button class="control-btn" id="new-game">Nuova Partita</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MODAL -->
+        <div class="modal-overlay" id="game-end-modal">
+            <div class="modal">
+                <h2 id="modal-title">Partita Terminata</h2>
+                <p id="modal-message"></p>
+                <button class="btn-primary" id="modal-new-game">Nuova Partita</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script>
+    (function() {
+        // ========== STATE ==========
+        const State = {
+            players: { white: 'human', black: 'ai' },
+            speed: 'step',
+            armies: { white: [], black: [] },
+            armiesConfirmed: { white: false, black: false },
+            cartQty: { 
+                white: { q: 0, r: 0, b: 0, n: 0, p: 0 }, 
+                black: { q: 0, r: 0, b: 0, n: 0, p: 0 } 
+            },
+            positions: { white: {}, black: {} },
+            currentTurn: 'white',
+            chess: null,
+            selectedSquare: null,
+            selectedTrayPiece: null,
+            captured: { white: [], black: [] },
+            gameOver: false,
+            thinking: false
+        };
+        
+        const BUDGET = 39;
+        const MAX_SLOTS = 15;
+        const COSTS = { q: 9, r: 5, b: 3, n: 3, p: 1 };
+        const ICONS = {
+            white: { k: '♔', q: '♕', r: '♖', b: '♗', n: '♘', p: '♙' },
+            black: { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
+        };
+        const CLASSIC = ['r', 'n', 'b', 'q', 'r', 'n', 'b', 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'];
+        
+        // ========== AI ==========
+        const AI = {
+            pieceValues: { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 },
+            
+            evaluate(chess) {
+                if (chess.in_checkmate()) return chess.turn() === 'w' ? -99999 : 99999;
+                if (chess.in_draw()) return 0;
+                
+                let score = 0;
+                const board = chess.board();
+                for (let r = 0; r < 8; r++) {
+                    for (let c = 0; c < 8; c++) {
+                        const piece = board[r][c];
+                        if (piece) {
+                            const val = this.pieceValues[piece.type];
+                            score += piece.color === 'w' ? val : -val;
+                        }
+                    }
+                }
+                return score;
+            },
+            
+            minimax(chess, depth, alpha, beta, maximizing) {
+                if (depth === 0 || chess.game_over()) return this.evaluate(chess);
+                
+                const moves = chess.moves();
+                if (maximizing) {
+                    let max = -Infinity;
+                    for (const move of moves) {
+                        chess.move(move);
+                        max = Math.max(max, this.minimax(chess, depth - 1, alpha, beta, false));
+                        chess.undo();
+                        alpha = Math.max(alpha, max);
+                        if (beta <= alpha) break;
+                    }
+                    return max;
+                } else {
+                    let min = Infinity;
+                    for (const move of moves) {
+                        chess.move(move);
+                        min = Math.min(min, this.minimax(chess, depth - 1, alpha, beta, true));
+                        chess.undo();
+                        beta = Math.min(beta, min);
+                        if (beta <= alpha) break;
+                    }
+                    return min;
+                }
+            },
+            
+            getBestMove(chess) {
+                const moves = chess.moves({ verbose: true });
+                if (!moves.length) return null;
+                
+                // Shuffle for variety
+                for (let i = moves.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [moves[i], moves[j]] = [moves[j], moves[i]];
+                }
+                
+                const isWhite = chess.turn() === 'w';
+                let best = moves[0];
+                let bestVal = isWhite ? -Infinity : Infinity;
+                
+                for (const move of moves) {
+                    chess.move(move);
+                    const val = this.minimax(chess, 2, -Infinity, Infinity, !isWhite);
+                    chess.undo();
+                    
+                    if (isWhite ? val > bestVal : val < bestVal) {
+                        bestVal = val;
+                        best = move;
+                    }
+                }
+                return best;
+            }
+        };
+        
+        // ========== UTILS ==========
+        function $(id) { return document.getElementById(id); }
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            $(id).classList.add('active');
+        }
+        
+        // ========== SETUP ==========
+        document.querySelectorAll('.player-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const player = btn.dataset.player;
+                document.querySelectorAll('.player-type-btn[data-player="' + player + '"]').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                State.players[player] = btn.dataset.type;
+            });
+        });
+        
+        document.querySelectorAll('input[name="speed"]').forEach(r => {
+            r.addEventListener('change', () => { State.speed = r.value; });
+        });
+        
+        $('start-game').addEventListener('click', () => {
+            showScreen('army-screen');
+            initArmySelection();
+        });
+        
+        // ========== ARMY SELECTION ==========
+        function initArmySelection() {
+            State.armies = { white: [], black: [] };
+            State.armiesConfirmed = { white: false, black: false };
+            State.cartQty = { 
+                white: { q: 0, r: 0, b: 0, n: 0, p: 0 }, 
+                black: { q: 0, r: 0, b: 0, n: 0, p: 0 } 
+            };
+            
+            ['white', 'black'].forEach(color => {
+                resetCart(color);
+                updateCartDisplay(color);
+                const panel = $(color + '-army-panel');
+                panel.classList.remove('hidden-selection');
+                panel.style.pointerEvents = '';
+                
+                // Setup cart button listeners
+                const cart = $(color + '-cart');
+                cart.querySelectorAll('.cart-item').forEach(item => {
+                    const piece = item.dataset.piece;
+                    item.querySelector('.plus').onclick = () => changeQty(color, piece, 1);
+                    item.querySelector('.minus').onclick = () => changeQty(color, piece, -1);
+                });
+                
+                if (State.players[color] === 'ai') {
+                    setClassicArmy(color);
+                    State.armiesConfirmed[color] = true;
+                    panel.classList.add('hidden-selection');
+                    checkArmiesReady();
+                }
+            });
+        }
+        
+        function resetCart(color) {
+            State.cartQty[color] = { q: 0, r: 0, b: 0, n: 0, p: 0 };
+        }
+        
+        function changeQty(color, piece, delta) {
+            const newQty = State.cartQty[color][piece] + delta;
+            if (newQty < 0) return;
+            
+            // Calculate totals
+            let totalPieces = 0;
+            let totalPoints = 0;
+            for (const p in State.cartQty[color]) {
+                const qty = p === piece ? newQty : State.cartQty[color][p];
+                totalPieces += qty;
+                totalPoints += qty * COSTS[p];
+            }
+            
+            // Check limits
+            if (totalPieces > MAX_SLOTS) return;
+            if (totalPoints > BUDGET) return;
+            
+            State.cartQty[color][piece] = newQty;
+            updateCartDisplay(color);
+        }
+        
+        function updateCartDisplay(color) {
+            const cart = $(color + '-cart');
+            let totalPieces = 0;
+            let totalPoints = 0;
+            
+            cart.querySelectorAll('.cart-item').forEach(item => {
+                const piece = item.dataset.piece;
+                const qty = State.cartQty[color][piece];
+                item.querySelector('.qty-value').textContent = qty;
+                totalPieces += qty;
+                totalPoints += qty * COSTS[piece];
+            });
+            
+            // Update summary
+            $(color + '-pieces-count').textContent = totalPieces;
+            $(color + '-points-used').textContent = totalPoints;
+            
+            // Update button states
+            cart.querySelectorAll('.cart-item').forEach(item => {
+                const piece = item.dataset.piece;
+                const qty = State.cartQty[color][piece];
+                const canAdd = totalPieces < MAX_SLOTS && totalPoints + COSTS[piece] <= BUDGET;
+                item.querySelector('.plus').disabled = !canAdd;
+                item.querySelector('.minus').disabled = qty <= 0;
+            });
+            
+            // Build army array
+            State.armies[color] = [];
+            for (const p in State.cartQty[color]) {
+                for (let i = 0; i < State.cartQty[color][p]; i++) {
+                    State.armies[color].push(p);
+                }
+            }
+            
+            // Update confirm button
+            $(color + '-confirm').disabled = totalPieces === 0;
+        }
+        
+        function setClassicArmy(color) {
+            State.cartQty[color] = { q: 1, r: 2, b: 2, n: 2, p: 8 };
+            updateCartDisplay(color);
+        }
+        
+        ['white', 'black'].forEach(color => {
+            $(color + '-classic').onclick = () => { setClassicArmy(color); };
+            $(color + '-clear').onclick = () => { resetCart(color); updateCartDisplay(color); };
+            $(color + '-confirm').onclick = () => {
+                if (State.armies[color].length > 0) {
+                    State.armiesConfirmed[color] = true;
+                    $(color + '-army-panel').classList.add('hidden-selection');
+                    checkArmiesReady();
+                }
+            };
+        });
+        
+        function checkArmiesReady() {
+            if (State.armiesConfirmed.white && State.armiesConfirmed.black) {
+                $('army-status').textContent = 'Eserciti pronti!';
+                setTimeout(() => { showScreen('positioning-screen'); initPositioning(); }, 500);
+            }
+        }
+        
+        // ========== POSITIONING ==========
+        function initPositioning() {
+            State.positions = { white: {}, black: {} };
+            State.selectedTrayPiece = null;
+            
+            createPositioningBoard();
+            updateTrays();
+            
+            ['white', 'black'].forEach(color => {
+                $(color + '-tray').style.opacity = State.players[color] === 'ai' ? '0.5' : '1';
+                if (State.players[color] === 'ai') autoPosition(color);
+            });
+            
+            updatePositioningBoard();
+            updatePositioningStatus();
+        }
+        
+        function createPositioningBoard() {
+            const board = $('positioning-board');
+            board.innerHTML = '';
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const sq = document.createElement('div');
+                    const isLight = (row + col) % 2 === 0;
+                    sq.className = 'square ' + (isLight ? 'light' : 'dark');
+                    
+                    const file = String.fromCharCode(97 + col);
+                    const rank = 8 - row;
+                    sq.dataset.square = file + rank;
+                    
+                    if (col === 0) {
+                        const lbl = document.createElement('span');
+                        lbl.className = 'row-label';
+                        lbl.textContent = rank;
+                        sq.appendChild(lbl);
+                    }
+                    if (row === 7) {
+                        const lbl = document.createElement('span');
+                        lbl.className = 'col-label';
+                        lbl.textContent = file;
+                        sq.appendChild(lbl);
+                    }
+                    
+                    // Click
+                    sq.addEventListener('click', () => onPositioningSquareClick(sq));
+                    
+                    // Drag over
+                    sq.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        const r = parseInt(sq.dataset.square[1]);
+                        const types = e.dataTransfer.types;
+                        const dragColor = types.indexOf('white') >= 0 ? 'white' : (types.indexOf('black') >= 0 ? 'black' : null);
+                        if (dragColor) {
+                            const valid = (dragColor === 'white' && r <= 2) || (dragColor === 'black' && r >= 7);
+                            if (valid) sq.classList.add('drag-over');
+                        }
+                    });
+                    sq.addEventListener('dragleave', () => sq.classList.remove('drag-over'));
+                    sq.addEventListener('drop', e => {
+                        e.preventDefault();
+                        sq.classList.remove('drag-over');
+                        onDrop(sq, e.dataTransfer);
+                    });
+                    
+                    board.appendChild(sq);
+                }
+            }
+        }
+        
+        function updateTrays() {
+            ['white', 'black'].forEach(color => {
+                const tray = $(color + '-tray-pieces');
+                tray.innerHTML = '';
+                
+                const positioned = Object.values(State.positions[color]);
+                const posIndices = [];
+                positioned.forEach(p => { if (p.piece !== 'k') posIndices.push(p.index); });
+                const kingPos = positioned.some(p => p.piece === 'k');
+                
+                if (!kingPos) tray.appendChild(createTrayPiece(color, 'k', -1));
+                
+                State.armies[color].forEach((p, i) => {
+                    if (posIndices.indexOf(i) < 0) tray.appendChild(createTrayPiece(color, p, i));
+                });
+            });
+        }
+        
+        function createTrayPiece(color, piece, index) {
+            const span = document.createElement('span');
+            span.className = 'tray-piece';
+            span.textContent = ICONS[color][piece];
+            span.draggable = State.players[color] === 'human';
+            
+            span.onclick = () => {
+                if (State.players[color] !== 'human') return;
+                clearSelection();
+                State.selectedTrayPiece = { color: color, piece: piece, index: index, element: span };
+                span.classList.add('selected');
+                highlightValidSquares(color);
+            };
+            
+            span.addEventListener('dragstart', e => {
+                span.classList.add('dragging');
+                e.dataTransfer.setData(color, JSON.stringify({ piece: piece, index: index }));
+            });
+            span.addEventListener('dragend', () => span.classList.remove('dragging'));
+            
+            return span;
+        }
+        
+        function onPositioningSquareClick(sq) {
+            const square = sq.dataset.square;
+            const rank = parseInt(square[1]);
+            const existing = getPieceAt(square);
+            
+            // If we have a tray piece selected
+            if (State.selectedTrayPiece) {
+                const color = State.selectedTrayPiece.color;
+                const piece = State.selectedTrayPiece.piece;
+                const index = State.selectedTrayPiece.index;
+                const valid = (color === 'white' && rank <= 2) || (color === 'black' && rank >= 7);
+                
+                if (valid) {
+                    if (existing && existing.color === color) {
+                        delete State.positions[color][square];
+                    }
+                    State.positions[color][square] = { piece: piece, index: index };
+                    clearSelection();
+                    updatePositioningBoard();
+                    updateTrays();
+                    updatePositioningStatus();
+                } else {
+                    clearSelection();
+                }
+                return;
+            }
+            
+            // If we have a board piece selected
+            if (State.selectedSquare) {
+                const from = State.selectedSquare;
+                const fromPiece = getPieceAt(from);
+                
+                if (from === square) {
+                    clearSelection();
+                    updatePositioningBoard();
+                    return;
+                }
+                
+                const valid = (fromPiece.color === 'white' && rank <= 2) || (fromPiece.color === 'black' && rank >= 7);
+                if (valid && fromPiece.color === (existing ? existing.color : fromPiece.color)) {
+                    if (existing) {
+                        // Swap
+                        State.positions[fromPiece.color][square] = { piece: fromPiece.piece, index: fromPiece.index };
+                        State.positions[fromPiece.color][from] = { piece: existing.piece, index: existing.index };
+                    } else {
+                        delete State.positions[fromPiece.color][from];
+                        State.positions[fromPiece.color][square] = { piece: fromPiece.piece, index: fromPiece.index };
+                    }
+                }
+                clearSelection();
+                updatePositioningBoard();
+                updatePositioningStatus();
+                return;
+            }
+            
+            // Select a piece on the board
+            if (existing && State.players[existing.color] === 'human') {
+                State.selectedSquare = square;
+                sq.classList.add('selected');
+                highlightValidSquares(existing.color);
+            }
+        }
+        
+        function onDrop(sq, dataTransfer) {
+            const square = sq.dataset.square;
+            const rank = parseInt(square[1]);
+            const types = dataTransfer.types;
+            const color = types.indexOf('white') >= 0 ? 'white' : (types.indexOf('black') >= 0 ? 'black' : null);
+            if (!color) return;
+            
+            const data = JSON.parse(dataTransfer.getData(color));
+            const valid = (color === 'white' && rank <= 2) || (color === 'black' && rank >= 7);
+            if (!valid) return;
+            
+            const existing = getPieceAt(square);
+            
+            if (data.fromSquare) {
+                // From board
+                if (data.fromSquare === square) return;
+                if (existing && existing.color === color) {
+                    State.positions[color][square] = { piece: data.piece, index: data.index };
+                    State.positions[color][data.fromSquare] = { piece: existing.piece, index: existing.index };
+                } else if (!existing) {
+                    delete State.positions[color][data.fromSquare];
+                    State.positions[color][square] = { piece: data.piece, index: data.index };
+                }
+            } else {
+                // From tray
+                if (existing && existing.color === color) {
+                    delete State.positions[color][square];
+                }
+                State.positions[color][square] = { piece: data.piece, index: data.index };
+            }
+            
+            clearSelection();
+            updatePositioningBoard();
+            updateTrays();
+            updatePositioningStatus();
+        }
+        
+        function getPieceAt(square) {
+            for (var c = 0; c < 2; c++) {
+                var color = c === 0 ? 'white' : 'black';
+                if (State.positions[color][square]) {
+                    var p = State.positions[color][square];
+                    return { color: color, piece: p.piece, index: p.index };
+                }
+            }
+            return null;
+        }
+        
+        function highlightValidSquares(color) {
+            document.querySelectorAll('#positioning-board .square').forEach(sq => {
+                var rank = parseInt(sq.dataset.square[1]);
+                var valid = (color === 'white' && rank <= 2) || (color === 'black' && rank >= 7);
+                if (valid) sq.classList.add('highlight');
+            });
+        }
+        
+        function clearSelection() {
+            State.selectedTrayPiece = null;
+            State.selectedSquare = null;
+            document.querySelectorAll('.tray-piece.selected').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.square.highlight, .square.selected').forEach(sq => sq.classList.remove('highlight', 'selected'));
+        }
+        
+        function updatePositioningBoard() {
+            document.querySelectorAll('#positioning-board .square').forEach(sq => {
+                var labels = sq.querySelectorAll('.row-label, .col-label');
+                sq.innerHTML = '';
+                labels.forEach(l => sq.appendChild(l));
+                
+                var p = getPieceAt(sq.dataset.square);
+                if (p) {
+                    var span = document.createElement('span');
+                    span.className = 'piece';
+                    span.textContent = ICONS[p.color][p.piece];
+                    
+                    if (State.players[p.color] === 'human') {
+                        span.draggable = true;
+                        (function(piece, idx, sqName, clr) {
+                            span.addEventListener('dragstart', function(e) {
+                                span.classList.add('dragging');
+                                e.dataTransfer.setData(clr, JSON.stringify({ piece: piece, index: idx, fromSquare: sqName }));
+                            });
+                        })(p.piece, p.index, sq.dataset.square, p.color);
+                        span.addEventListener('dragend', function() { span.classList.remove('dragging'); });
+                    }
+                    
+                    sq.appendChild(span);
+                }
+            });
+        }
+        
+        function autoPosition(color) {
+            var pieces = ['k'].concat(State.armies[color]);
+            var r1 = color === 'white' ? 1 : 8;
+            var r2 = color === 'white' ? 2 : 7;
+            var files = 'abcdefgh'.split('').sort(function() { return Math.random() - 0.5; });
+            
+            var i = 0;
+            for (var f = 0; f < files.length; f++) {
+                if (i >= pieces.length) break;
+                State.positions[color][files[f] + r1] = { piece: pieces[i], index: pieces[i] === 'k' ? -1 : i - 1 };
+                i++;
+            }
+            for (var f = 0; f < files.length; f++) {
+                if (i >= pieces.length) break;
+                State.positions[color][files[f] + r2] = { piece: pieces[i], index: i - 1 };
+                i++;
+            }
+        }
+        
+        function updatePositioningStatus() {
+            var wReady = isPositionComplete('white');
+            var bReady = isPositionComplete('black');
+            
+            if (wReady && bReady) {
+                $('positioning-status').textContent = 'Tutti i pezzi posizionati!';
+            } else {
+                var waiting = [];
+                if (!wReady) waiting.push('Bianco');
+                if (!bReady) waiting.push('Nero');
+                $('positioning-status').textContent = 'In attesa: ' + waiting.join(', ');
+            }
+        }
+        
+        function isPositionComplete(color) {
+            var pos = Object.values(State.positions[color]);
+            var hasKing = pos.some(function(p) { return p.piece === 'k'; });
+            var count = pos.filter(function(p) { return p.piece !== 'k'; }).length;
+            return hasKing && count === State.armies[color].length;
+        }
+        
+        $('auto-position').onclick = function() {
+            ['white', 'black'].forEach(function(c) {
+                if (State.players[c] === 'human') {
+                    State.positions[c] = {};
+                    autoPosition(c);
+                }
+            });
+            updatePositioningBoard();
+            updateTrays();
+            updatePositioningStatus();
+        };
+        
+        $('confirm-position').onclick = function() {
+            if (isPositionComplete('white') && isPositionComplete('black')) {
+                showScreen('game-screen');
+                initGame();
+            }
+        };
+        
+        // ========== GAME ==========
+        function initGame() {
+            var fen = buildFEN();
+            State.chess = new Chess(fen);
+            State.currentTurn = Math.random() < 0.5 ? 'white' : 'black';
+            State.captured = { white: [], black: [] };
+            State.gameOver = false;
+            State.selectedSquare = null;
+            
+            var parts = fen.split(' ');
+            parts[1] = State.currentTurn === 'white' ? 'w' : 'b';
+            State.chess.load(parts.join(' '));
+            
+            createGameBoard();
+            updateTurnIndicator();
+            
+            var needStep = State.speed === 'step' && (State.players.white === 'ai' || State.players.black === 'ai');
+            $('next-move').style.display = needStep ? 'inline-block' : 'none';
+            
+            maybeAIMove();
+        }
+        
+        function buildFEN() {
+            var board = [];
+            for (var r = 0; r < 8; r++) {
+                board.push([null, null, null, null, null, null, null, null]);
+            }
+            
+            ['white', 'black'].forEach(function(color) {
+                for (var sq in State.positions[color]) {
+                    var data = State.positions[color][sq];
+                    var f = sq.charCodeAt(0) - 97;
+                    var r = 8 - parseInt(sq[1]);
+                    board[r][f] = color === 'white' ? data.piece.toUpperCase() : data.piece;
+                }
+            });
+            
+            var fen = '';
+            for (var r = 0; r < 8; r++) {
+                var empty = 0;
+                for (var f = 0; f < 8; f++) {
+                    if (board[r][f]) {
+                        if (empty) { fen += empty; empty = 0; }
+                        fen += board[r][f];
+                    } else empty++;
+                }
+                if (empty) fen += empty;
+                if (r < 7) fen += '/';
+            }
+            return fen + ' w - - 0 1';
+        }
+        
+        function createGameBoard() {
+            var board = $('game-board');
+            board.innerHTML = '';
+            
+            for (var row = 0; row < 8; row++) {
+                for (var col = 0; col < 8; col++) {
+                    var sq = document.createElement('div');
+                    sq.className = 'square ' + ((row + col) % 2 === 0 ? 'light' : 'dark');
+                    
+                    var file = String.fromCharCode(97 + col);
+                    var rank = 8 - row;
+                    sq.dataset.square = file + rank;
+                    
+                    if (col === 0) {
+                        var lbl = document.createElement('span');
+                        lbl.className = 'row-label';
+                        lbl.textContent = rank;
+                        sq.appendChild(lbl);
+                    }
+                    if (row === 7) {
+                        var lbl = document.createElement('span');
+                        lbl.className = 'col-label';
+                        lbl.textContent = file;
+                        sq.appendChild(lbl);
+                    }
+                    
+                    (function(square) {
+                        square.onclick = function() { onGameSquareClick(square); };
+                    })(sq);
+                    board.appendChild(sq);
+                }
+            }
+            updateGameBoard();
+        }
+        
+        function updateGameBoard() {
+            document.querySelectorAll('#game-board .square').forEach(function(sq) {
+                sq.classList.remove('highlight', 'valid-move', 'last-move', 'check');
+                
+                var labels = sq.querySelectorAll('.row-label, .col-label');
+                sq.innerHTML = '';
+                labels.forEach(function(l) { sq.appendChild(l); });
+                
+                var piece = State.chess.get(sq.dataset.square);
+                if (piece) {
+                    var color = piece.color === 'w' ? 'white' : 'black';
+                    var span = document.createElement('span');
+                    span.className = 'piece';
+                    span.textContent = ICONS[color][piece.type];
+                    sq.appendChild(span);
+                }
+            });
+            
+            if (State.chess.in_check()) {
+                var kingPos = findKing(State.chess.turn());
+                if (kingPos) document.querySelector('#game-board [data-square="' + kingPos + '"]').classList.add('check');
+            }
+            
+            $('white-captured').textContent = State.captured.white.map(function(p) { return ICONS.black[p]; }).join('');
+            $('black-captured').textContent = State.captured.black.map(function(p) { return ICONS.white[p]; }).join('');
+        }
+        
+        function findKing(color) {
+            for (var r = 1; r <= 8; r++) {
+                for (var fi = 0; fi < 8; fi++) {
+                    var f = 'abcdefgh'[fi];
+                    var p = State.chess.get(f + r);
+                    if (p && p.type === 'k' && p.color === color) return f + r;
+                }
+            }
+            return null;
+        }
+        
+        function onGameSquareClick(sq) {
+            if (State.gameOver || State.players[State.currentTurn] === 'ai') return;
+            
+            var square = sq.dataset.square;
+            var piece = State.chess.get(square);
+            var turn = State.chess.turn() === 'w' ? 'white' : 'black';
+            
+            if (State.selectedSquare) {
+                var move = State.chess.move({ from: State.selectedSquare, to: square, promotion: 'q' });
+                
+                if (move) {
+                    if (move.captured) State.captured[State.currentTurn].push(move.captured);
+                    State.selectedSquare = null;
+                    updateGameBoard();
+                    checkGameEnd();
+                    if (!State.gameOver) {
+                        State.currentTurn = State.currentTurn === 'white' ? 'black' : 'white';
+                        updateTurnIndicator();
+                        maybeAIMove();
+                    }
+                } else if (piece && piece.color === (turn === 'white' ? 'w' : 'b')) {
+                    selectGameSquare(square);
+                } else {
+                    State.selectedSquare = null;
+                    updateGameBoard();
+                }
+            } else if (piece && piece.color === (turn === 'white' ? 'w' : 'b')) {
+                selectGameSquare(square);
+            }
+        }
+        
+        function selectGameSquare(square) {
+            State.selectedSquare = square;
+            updateGameBoard();
+            
+            var sq = document.querySelector('#game-board [data-square="' + square + '"]');
+            sq.classList.add('highlight');
+            
+            State.chess.moves({ square: square, verbose: true }).forEach(function(m) {
+                document.querySelector('#game-board [data-square="' + m.to + '"]').classList.add('valid-move');
+            });
+        }
+        
+        function updateTurnIndicator() {
+            var icon = State.currentTurn === 'white' ? '♔' : '♚';
+            var name = State.currentTurn === 'white' ? 'Bianco' : 'Nero';
+            var ai = State.players[State.currentTurn] === 'ai' ? ' (IA)' : '';
+            $('turn-indicator').innerHTML = 'Turno: ' + icon + ' ' + name + ai + (State.thinking ? '<span class="loading"></span>' : '');
+        }
+        
+        function maybeAIMove() {
+            if (State.gameOver || State.players[State.currentTurn] !== 'ai') return;
+            
+            if (State.speed === 'instant') doAIMove();
+            else if (State.speed === 'timed') setTimeout(doAIMove, 1000);
+            // step: wait for button
+        }
+        
+        function doAIMove() {
+            if (State.thinking || State.gameOver) return;
+            State.thinking = true;
+            updateTurnIndicator();
+            
+            setTimeout(function() {
+                var move = AI.getBestMove(State.chess);
+                if (move) {
+                    var result = State.chess.move(move);
+                    if (result && result.captured) State.captured[State.currentTurn].push(result.captured);
+                }
+                State.thinking = false;
+                updateGameBoard();
+                checkGameEnd();
+                if (!State.gameOver) {
+                    State.currentTurn = State.currentTurn === 'white' ? 'black' : 'white';
+                    updateTurnIndicator();
+                    maybeAIMove();
+                }
+            }, 50);
+        }
+        
+        $('next-move').onclick = function() {
+            if (State.players[State.currentTurn] === 'ai' && !State.thinking) doAIMove();
+        };
+        
+        function checkGameEnd() {
+            if (!State.chess.game_over()) return;
+            State.gameOver = true;
+            
+            var title, msg;
+            if (State.chess.in_checkmate()) {
+                title = 'Scacco Matto!';
+                msg = (State.currentTurn === 'white' ? 'Bianco' : 'Nero') + ' vince!';
+            } else {
+                title = 'Patta';
+                msg = State.chess.in_stalemate() ? 'Stallo.' : 'Partita pari.';
+            }
+            
+            $('modal-title').textContent = title;
+            $('modal-message').textContent = msg;
+            $('game-end-modal').classList.add('active');
+        }
+        
+        $('new-game').onclick = $('modal-new-game').onclick = function() {
+            $('game-end-modal').classList.remove('active');
+            showScreen('setup-screen');
+        };
+    })();
+    </script>
+</body>
+</html>
