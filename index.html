@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Royale</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Chess Royale</h1>
+        <p class="subtitle" data-i18n="subtitle">Build your army, conquer the kingdom</p>
+        
+        <div class="language-selector">
+            <button class="lang-btn selected" data-lang="en">English</button>
+            <button class="lang-btn" data-lang="it">Italiano</button>
+        </div>
+        
+        <!-- SETUP SCREEN -->
+        <div id="setup-screen" class="screen active">
+            <div class="setup-panel">
+                <div class="setup-section">
+                    <h2 data-i18n="players">Players</h2>
+                    <div class="player-setup">
+                        <div class="player-config">
+                            <h3>♔ <span data-i18n="white">White</span></h3>
+                            <div class="player-type-select">
+                                <button class="player-type-btn selected" data-player="white" data-type="human" data-i18n="human">Human</button>
+                                <button class="player-type-btn" data-player="white" data-type="ai" data-i18n="ai">AI</button>
+                            </div>
+                        </div>
+                        <div class="player-config">
+                            <h3>♚ <span data-i18n="black">Black</span></h3>
+                            <div class="player-type-select">
+                                <button class="player-type-btn" data-player="black" data-type="human" data-i18n="human">Human</button>
+                                <button class="player-type-btn selected" data-player="black" data-type="ai" data-i18n="ai">AI</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setup-section">
+                    <h2 data-i18n="aiSpeed">AI Speed</h2>
+                    <div class="speed-options">
+                        <label class="speed-option">
+                            <input type="radio" name="speed" value="instant"> <span data-i18n="instant">Instant</span>
+                        </label>
+                        <label class="speed-option">
+                            <input type="radio" name="speed" value="step" checked> <span data-i18n="stepByStep">Step-by-step</span>
+                        </label>
+                        <label class="speed-option">
+                            <input type="radio" name="speed" value="timed"> <span data-i18n="timed">1 second/move</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" id="start-game" data-i18n="startGame">Start Game</button>
+            </div>
+        </div>
+        
+        <!-- ARMY SELECTION SCREEN -->
+        <div id="army-screen" class="screen">
+            <div class="army-selection">
+                <div class="army-panel" id="white-army-panel" data-selection-text="Selection in progress...">
+                    <h3>♔ <span data-i18n="whiteArmy">White Army</span></h3>
+                    <div class="piece-cart" id="white-cart">
+                        <div class="cart-item" data-piece="q">
+                            <span class="piece-icon">♕</span>
+                            <span class="piece-name" data-i18n="queen">Queen</span>
+                            <span class="piece-cost">9 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="r">
+                            <span class="piece-icon">♖</span>
+                            <span class="piece-name" data-i18n="rook">Rook</span>
+                            <span class="piece-cost">5 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="b">
+                            <span class="piece-icon">♗</span>
+                            <span class="piece-name" data-i18n="bishop">Bishop</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="n">
+                            <span class="piece-icon">♘</span>
+                            <span class="piece-name" data-i18n="knight">Knight</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="p">
+                            <span class="piece-icon">♙</span>
+                            <span class="piece-name" data-i18n="pawn">Pawn</span>
+                            <span class="piece-cost">1 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-summary" id="white-summary">
+                        <div class="summary-row">
+                            <span data-i18n="pieces">Pieces:</span>
+                            <span><span id="white-pieces-count">0</span> / 15</span>
+                        </div>
+                        <div class="summary-row">
+                            <span data-i18n="pointsUsed">Points used:</span>
+                            <span><span id="white-points-used">0</span> / 39</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span data-i18n="kingIncluded">King (included):</span>
+                            <span>♔</span>
+                        </div>
+                    </div>
+                    <div class="army-actions">
+                        <button class="btn-secondary" id="white-classic" data-i18n="classic">Classic</button>
+                        <button class="btn-secondary" id="white-clear" data-i18n="clear">Clear</button>
+                        <button class="btn-confirm" id="white-confirm" data-i18n="confirm">Confirm</button>
+                    </div>
+                </div>
+                
+                <div class="army-panel" id="black-army-panel" data-selection-text="Selection in progress...">
+                    <h3>♚ <span data-i18n="blackArmy">Black Army</span></h3>
+                    <div class="piece-cart" id="black-cart">
+                        <div class="cart-item" data-piece="q">
+                            <span class="piece-icon">♛</span>
+                            <span class="piece-name" data-i18n="queen">Queen</span>
+                            <span class="piece-cost">9 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="r">
+                            <span class="piece-icon">♜</span>
+                            <span class="piece-name" data-i18n="rook">Rook</span>
+                            <span class="piece-cost">5 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="b">
+                            <span class="piece-icon">♝</span>
+                            <span class="piece-name" data-i18n="bishop">Bishop</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="n">
+                            <span class="piece-icon">♞</span>
+                            <span class="piece-name" data-i18n="knight">Knight</span>
+                            <span class="piece-cost">3 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item" data-piece="p">
+                            <span class="piece-icon">♟</span>
+                            <span class="piece-name" data-i18n="pawn">Pawn</span>
+                            <span class="piece-cost">1 pt</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn minus">−</button>
+                                <span class="qty-value">0</span>
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-summary" id="black-summary">
+                        <div class="summary-row">
+                            <span data-i18n="pieces">Pieces:</span>
+                            <span><span id="black-pieces-count">0</span> / 15</span>
+                        </div>
+                        <div class="summary-row">
+                            <span data-i18n="pointsUsed">Points used:</span>
+                            <span><span id="black-points-used">0</span> / 39</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span data-i18n="kingIncluded">King (included):</span>
+                            <span>♚</span>
+                        </div>
+                    </div>
+                    <div class="army-actions">
+                        <button class="btn-secondary" id="black-classic" data-i18n="classic">Classic</button>
+                        <button class="btn-secondary" id="black-clear" data-i18n="clear">Clear</button>
+                        <button class="btn-confirm" id="black-confirm" data-i18n="confirm">Confirm</button>
+                    </div>
+                </div>
+            </div>
+            <p class="status-message" id="army-status"></p>
+        </div>
+        
+        <!-- POSITIONING SCREEN -->
+        <div id="positioning-screen" class="screen">
+            <p class="status-message" id="positioning-status" data-i18n="positioningHint">Place your pieces in the first two rows</p>
+            <div class="positioning-area">
+                <div class="pieces-tray" id="white-tray">
+                    <h3>♔ <span data-i18n="whitePieces">White</span></h3>
+                    <div class="tray-pieces" id="white-tray-pieces"></div>
+                </div>
+                
+                <div class="board-container">
+                    <div class="board-frame">
+                        <div class="chessboard" id="positioning-board"></div>
+                    </div>
+                    <div class="game-controls">
+                        <button class="control-btn" id="auto-position" data-i18n="auto">Auto</button>
+                        <button class="control-btn" id="confirm-position" data-i18n="confirm">Confirm</button>
+                    </div>
+                </div>
+                
+                <div class="pieces-tray" id="black-tray">
+                    <h3>♚ <span data-i18n="blackPieces">Black</span></h3>
+                    <div class="tray-pieces" id="black-tray-pieces"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="screen">
+            <div class="positioning-area">
+                <div class="game-info">
+                    <div class="turn-indicator" id="turn-indicator"></div>
+                    <div class="captured-pieces">
+                        <h4 data-i18n="capturedByWhite">Captured by White:</h4>
+                        <div class="captured-list" id="white-captured"></div>
+                    </div>
+                    <div class="captured-pieces">
+                        <h4 data-i18n="capturedByBlack">Captured by Black:</h4>
+                        <div class="captured-list" id="black-captured"></div>
+                    </div>
+                </div>
+                
+                <div class="board-container">
+                    <div class="board-frame">
+                        <div class="chessboard" id="game-board"></div>
+                    </div>
+                    <div class="game-controls" id="game-controls">
+                        <button class="control-btn" id="next-move" style="display:none;" data-i18n="nextMove">Next Move</button>
+                        <button class="control-btn" id="new-game" data-i18n="newGame">New Game</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MODAL -->
+        <div class="modal-overlay" id="game-end-modal">
+            <div class="modal">
+                <h2 id="modal-title" data-i18n="gameOver">Game Over</h2>
+                <p id="modal-message"></p>
+                <button class="btn-primary" id="modal-new-game" data-i18n="newGame">New Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- External library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    
+    <!-- Game modules (order matters) -->
+    <script src="js/constants.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/ui-setup.js"></script>
+    <script src="js/army-selection.js"></script>
+    <script src="js/positioning.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
