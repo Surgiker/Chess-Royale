@@ -4,7 +4,7 @@ Chess Royale is a small **game design experiment** that adds a **pre-game "army 
 
 ## Play online
 
-**[Play Chess Royale](https://TUOUSERNAME.github.io/scacchi-reali/)** — no download required.
+**[Play Chess Royale](https://Surgiker.github.io/Chess-Royale/)** — no download required.
 
 ## How the game works
 
