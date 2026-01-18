@@ -7,6 +7,8 @@ function initGame() {
     State.captured = { white: [], black: [] };
     State.gameOver = false;
     State.selectedSquare = null;
+    State.lastMove = null;
+    State.animating = false;
     
     const parts = fen.split(' ');
     parts[1] = State.currentTurn === 'white' ? 'w' : 'b';
@@ -17,6 +19,7 @@ function initGame() {
     
     const needStep = State.speed === 'step' && (State.players.white === 'ai' || State.players.black === 'ai');
     $('next-move').style.display = needStep ? 'inline-block' : 'none';
+    $('replay-move').style.display = 'none';
     
     maybeAIMove();
 }
@@ -102,6 +105,13 @@ function updateGameBoard() {
             span.textContent = ICONS[color][piece.type];
             sq.appendChild(span);
         }
+        
+        // Highlight last move squares
+        if (State.lastMove) {
+            if (sq.dataset.square === State.lastMove.from || sq.dataset.square === State.lastMove.to) {
+                sq.classList.add('last-move');
+            }
+        }
     });
     
     if (State.chess.in_check()) {
@@ -124,26 +134,121 @@ function findKing(color) {
     return null;
 }
 
+function getSquarePosition(square) {
+    const sq = document.querySelector('#game-board [data-square="' + square + '"]');
+    if (!sq) return null;
+    const rect = sq.getBoundingClientRect();
+    return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+    };
+}
+
+function animateMove(from, to, pieceIcon, callback) {
+    if (State.animating) {
+        if (callback) callback();
+        return;
+    }
+    
+    State.animating = true;
+    
+    const fromPos = getSquarePosition(from);
+    const toPos = getSquarePosition(to);
+    
+    if (!fromPos || !toPos) {
+        State.animating = false;
+        if (callback) callback();
+        return;
+    }
+    
+    // Hide the piece at destination temporarily
+    const toSquare = document.querySelector('#game-board [data-square="' + to + '"]');
+    const toPiece = toSquare.querySelector('.piece');
+    if (toPiece) toPiece.classList.add('hidden');
+    
+    // Create animated piece
+    const animPiece = document.createElement('span');
+    animPiece.className = 'piece-animating';
+    animPiece.textContent = pieceIcon;
+    animPiece.style.left = fromPos.x + 'px';
+    animPiece.style.top = fromPos.y + 'px';
+    animPiece.style.transform = 'translate(-50%, -50%)';
+    document.body.appendChild(animPiece);
+    
+    // Trigger animation
+    requestAnimationFrame(() => {
+        animPiece.style.left = toPos.x + 'px';
+        animPiece.style.top = toPos.y + 'px';
+    });
+    
+    // Cleanup after animation
+    setTimeout(() => {
+        animPiece.remove();
+        if (toPiece) toPiece.classList.remove('hidden');
+        State.animating = false;
+        if (callback) callback();
+    }, 320);
+}
+
+function replayLastMove() {
+    if (!State.lastMove || State.animating) return;
+    
+    const move = State.lastMove;
+    const pieceIcon = ICONS[move.color][move.piece];
+    
+    // Temporarily show piece at origin for animation
+    const fromSquare = document.querySelector('#game-board [data-square="' + move.from + '"]');
+    const toSquare = document.querySelector('#game-board [data-square="' + move.to + '"]');
+    
+    // Hide piece at destination
+    const toPiece = toSquare.querySelector('.piece');
+    if (toPiece) toPiece.classList.add('hidden');
+    
+    // Animate
+    animateMove(move.from, move.to, pieceIcon, () => {
+        if (toPiece) toPiece.classList.remove('hidden');
+    });
+}
+
 function onGameSquareClick(sq) {
-    if (State.gameOver || State.players[State.currentTurn] === 'ai') return;
+    if (State.gameOver || State.players[State.currentTurn] === 'ai' || State.animating) return;
     
     const square = sq.dataset.square;
     const piece = State.chess.get(square);
     const turn = State.chess.turn() === 'w' ? 'white' : 'black';
     
     if (State.selectedSquare) {
+        // Get piece info before move for animation
+        const movingPiece = State.chess.get(State.selectedSquare);
+        const pieceIcon = movingPiece ? ICONS[turn][movingPiece.type] : null;
+        
         const move = State.chess.move({ from: State.selectedSquare, to: square, promotion: 'q' });
         
         if (move) {
             if (move.captured) State.captured[State.currentTurn].push(move.captured);
+            
+            // Store last move
+            State.lastMove = {
+                from: move.from,
+                to: move.to,
+                piece: move.piece,
+                color: turn
+            };
+            
+            const fromSquare = State.selectedSquare;
             State.selectedSquare = null;
-            updateGameBoard();
-            checkGameEnd();
-            if (!State.gameOver) {
-                State.currentTurn = State.currentTurn === 'white' ? 'black' : 'white';
-                updateTurnIndicator();
-                maybeAIMove();
-            }
+            
+            // Animate then update
+            animateMove(fromSquare, square, pieceIcon, () => {
+                updateGameBoard();
+                $('replay-move').style.display = 'inline-block';
+                checkGameEnd();
+                if (!State.gameOver) {
+                    State.currentTurn = State.currentTurn === 'white' ? 'black' : 'white';
+                    updateTurnIndicator();
+                    maybeAIMove();
+                }
+            });
         } else if (piece && piece.color === (turn === 'white' ? 'w' : 'b')) {
             selectGameSquare(square);
         } else {
@@ -183,23 +288,50 @@ function maybeAIMove() {
 }
 
 function doAIMove() {
-    if (State.thinking || State.gameOver) return;
+    if (State.thinking || State.gameOver || State.animating) return;
     State.thinking = true;
     updateTurnIndicator();
     
     setTimeout(() => {
         const move = AI.getBestMove(State.chess);
         if (move) {
+            const turn = State.currentTurn;
+            const pieceIcon = ICONS[turn][move.piece];
+            const fromSquare = move.from;
+            const toSquare = move.to;
+            
             const result = State.chess.move(move);
-            if (result && result.captured) State.captured[State.currentTurn].push(result.captured);
-        }
-        State.thinking = false;
-        updateGameBoard();
-        checkGameEnd();
-        if (!State.gameOver) {
-            State.currentTurn = State.currentTurn === 'white' ? 'black' : 'white';
+            if (result) {
+                if (result.captured) State.captured[State.currentTurn].push(result.captured);
+                
+                // Store last move
+                State.lastMove = {
+                    from: result.from,
+                    to: result.to,
+                    piece: result.piece,
+                    color: turn
+                };
+            }
+            
+            State.thinking = false;
             updateTurnIndicator();
-            maybeAIMove();
+            
+            // Animate then continue
+            animateMove(fromSquare, toSquare, pieceIcon, () => {
+                updateGameBoard();
+                $('replay-move').style.display = 'inline-block';
+                checkGameEnd();
+                if (!State.gameOver) {
+                    State.currentTurn = State.currentTurn === 'white' ? 'black' : 'white';
+                    updateTurnIndicator();
+                    maybeAIMove();
+                }
+            });
+        } else {
+            State.thinking = false;
+            updateTurnIndicator();
+            updateGameBoard();
+            checkGameEnd();
         }
     }, 50);
 }
@@ -224,7 +356,11 @@ function checkGameEnd() {
 
 function setupGameButtons() {
     $('next-move').onclick = function() {
-        if (State.players[State.currentTurn] === 'ai' && !State.thinking) doAIMove();
+        if (State.players[State.currentTurn] === 'ai' && !State.thinking && !State.animating) doAIMove();
+    };
+    
+    $('replay-move').onclick = function() {
+        replayLastMove();
     };
     
     $('new-game').onclick = $('modal-new-game').onclick = function() {

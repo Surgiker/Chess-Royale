@@ -94,7 +94,7 @@ h1 {
 .player-type-btn:hover { background: var(--wood-light); color: var(--cream); }
 .player-type-btn.selected { background: var(--wood-dark); color: var(--cream); }
 
-.speed-options { display: flex; flex-direction: column; gap: 0.5rem; }
+.speed-options { display: flex; flex-direction: column; gap: 0.5rem; align-items: center; }
 .speed-option { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
 
 .btn-primary {
@@ -327,7 +327,8 @@ h1 {
     background: var(--cream);
     border: 2px solid var(--wood-light);
     padding: 1rem;
-    min-width: 180px;
+    width: 200px;
+    min-width: 200px;
 }
 .turn-indicator {
     text-align: center;
@@ -336,6 +337,11 @@ h1 {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--gold-dim);
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 .captured-pieces { margin-top: 0.5rem; }
 .captured-pieces h4 { font-size: 0.8rem; color: var(--wood-light); margin-bottom: 0.25rem; }
@@ -373,3 +379,16 @@ h1 {
     vertical-align: middle;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* PIECE ANIMATION */
+.piece-animating {
+    position: fixed;
+    font-size: 2rem;
+    pointer-events: none;
+    z-index: 100;
+    transition: transform 0.3s ease-in-out;
+}
+
+.square .piece.hidden {
+    visibility: hidden;
+}

@@ -48,6 +48,7 @@ const TRANSLATIONS = {
         capturedByBlack: "Captured by Black:",
         nextMove: "Next Move",
         newGame: "New Game",
+        replayMove: "Replay Last Move",
         
         // End game modal
         gameOver: "Game Over",
@@ -106,6 +107,7 @@ const TRANSLATIONS = {
         capturedByBlack: "Catturati dal Nero:",
         nextMove: "Prossima Mossa",
         newGame: "Nuova Partita",
+        replayMove: "Rivedi Ultima Mossa",
         
         // End game modal
         gameOver: "Partita Terminata",
@@ -115,6 +117,65 @@ const TRANSLATIONS = {
         draw: "Patta",
         stalemate: "Stallo.",
         drawGame: "Partita pari."
+    },
+    
+    zh: {
+        // Header
+        subtitle: "组建你的军队，征服王国",
+        
+        // Setup screen
+        players: "玩家",
+        white: "白方",
+        black: "黑方",
+        human: "人类",
+        ai: "AI",
+        aiSpeed: "AI速度",
+        instant: "即时",
+        stepByStep: "逐步",
+        timed: "每步1秒",
+        startGame: "开始游戏",
+        
+        // Army selection
+        whiteArmy: "白方军队",
+        blackArmy: "黑方军队",
+        queen: "后",
+        rook: "车",
+        bishop: "象",
+        knight: "马",
+        pawn: "兵",
+        pieces: "棋子：",
+        pointsUsed: "已用点数：",
+        kingIncluded: "王（必选）：",
+        classic: "经典",
+        clear: "清空",
+        confirm: "确认",
+        selectionInProgress: "选择进行中...",
+        armiesReady: "军队就绪！",
+        
+        // Positioning
+        positioningHint: "将棋子放置在前两行",
+        whitePieces: "白方",
+        blackPieces: "黑方",
+        auto: "自动",
+        allPiecesPlaced: "所有棋子已放置！",
+        waiting: "等待：",
+        
+        // Game
+        turn: "回合：",
+        capturedByWhite: "白方吃子：",
+        capturedByBlack: "黑方吃子：",
+        nextMove: "下一步",
+        newGame: "新游戏",
+        replayMove: "重播上一步",
+        
+        // End game modal
+        gameOver: "游戏结束",
+        checkmate: "将杀！",
+        whiteWins: "白方获胜！",
+        blackWins: "黑方获胜！",
+        draw: "和棋",
+        stalemate: "逼和。",
+        drawGame: "和棋。"
     }
 };
 

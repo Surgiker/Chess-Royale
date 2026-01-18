@@ -16,5 +16,7 @@ const State = {
     selectedTrayPiece: null,
     captured: { white: [], black: [] },
     gameOver: false,
-    thinking: false
+    thinking: false,
+    lastMove: null,
+    animating: false
 };

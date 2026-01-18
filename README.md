@@ -4,7 +4,7 @@ Chess Royale is a small **game design experiment** that adds a **pre-game "army 
 
 ## Play online
 
-**[Play Chess Royale](https://Surgiker.github.io/Chess-Royale/)** — no download required.
+**[Play Chess Royale](https://surgiker.github.io/Chess-Royale/)** — no download required.
 
 ## How the game works
 
@@ -70,15 +70,15 @@ The built-in AI is intentionally simple: a lightweight minimax with alpha-beta p
 
 ## Language support
 
-The game supports **English** and **Italian**. Use the language selector on the main screen to switch. Your preference is saved in local storage.
+The game supports **English**, **Italian**, and **Chinese**. Use the language selector on the main screen to switch. Your preference is saved in local storage.
 
 ## Run locally
 
 Clone the repository and serve the files:
 
 ```bash
-git clone https://github.com/TUOUSERNAME/scacchi-reali.git
-cd scacchi-reali
+git clone https://github.com/surgiker/Chess-Royale.git
+cd Chess-Royale
 python -m http.server 8000
 ```
 
@@ -87,7 +87,7 @@ Then open `http://localhost:8000`
 ## Project structure
 
 ```
-scacchi-reali/
+Chess-Royale/
 ├── index.html
 ├── css/
 │   └── style.css
@@ -95,7 +95,7 @@ scacchi-reali/
 │   ├── constants.js
 │   ├── state.js
 │   ├── utils.js
-│   ├── i18n.js          # translations (EN/IT)
+│   ├── i18n.js          # translations (EN/IT/ZH)
 │   ├── ai.js
 │   ├── ui-setup.js
 │   ├── army-selection.js
@@ -107,7 +107,7 @@ scacchi-reali/
 
 ## Previous versions
 
-* **[v1](https://github.com/TUOUSERNAME/scacchi-reali/tree/v1)** — original single-file version (archived)
+* **[v1](https://github.com/surgiker/Chess-Royale/tree/v1)** — original single-file version (archived)
 
 ## License
 
