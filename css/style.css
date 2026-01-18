@@ -347,6 +347,18 @@ h1 {
 .captured-pieces h4 { font-size: 0.8rem; color: var(--wood-light); margin-bottom: 0.25rem; }
 .captured-list { display: flex; flex-wrap: wrap; gap: 0.1rem; font-size: 1rem; min-height: 1.2rem; }
 
+.game-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gold-dim);
+}
+.game-buttons .control-btn {
+    width: 100%;
+}
+
 /* MODAL */
 .modal-overlay {
     display: none;
@@ -380,15 +392,15 @@ h1 {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* PIECE ANIMATION */
-.piece-animating {
-    position: fixed;
-    font-size: 2rem;
-    pointer-events: none;
-    z-index: 100;
-    transition: transform 0.3s ease-in-out;
+/* MANUAL SETUP OPTION */
+.manual-setup-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
 }
-
-.square .piece.hidden {
-    visibility: hidden;
+.manual-setup-option input {
+    cursor: pointer;
 }

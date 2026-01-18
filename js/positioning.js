@@ -1,5 +1,10 @@
 // ========== POSITIONING ==========
 
+// Helper: returns true if player should be controlled manually during setup
+function isManualControl(color) {
+    return State.players[color] === 'human' || State.manualSetup;
+}
+
 function initPositioning() {
     State.positions = { white: {}, black: {} };
     State.selectedTrayPiece = null;
@@ -8,8 +13,9 @@ function initPositioning() {
     updateTrays();
     
     ['white', 'black'].forEach(color => {
-        $(color + '-tray').style.opacity = State.players[color] === 'ai' ? '0.5' : '1';
-        if (State.players[color] === 'ai') autoPosition(color);
+        // If manual control, show full opacity and don't auto-position
+        $(color + '-tray').style.opacity = isManualControl(color) ? '1' : '0.5';
+        if (!isManualControl(color)) autoPosition(color);
     });
     
     updatePositioningBoard();
@@ -91,10 +97,10 @@ function createTrayPiece(color, piece, index) {
     const span = document.createElement('span');
     span.className = 'tray-piece';
     span.textContent = ICONS[color][piece];
-    span.draggable = State.players[color] === 'human';
+    span.draggable = isManualControl(color);
     
     span.onclick = () => {
-        if (State.players[color] !== 'human') return;
+        if (!isManualControl(color)) return;
         clearSelection();
         State.selectedTrayPiece = { color: color, piece: piece, index: index, element: span };
         span.classList.add('selected');
@@ -166,7 +172,7 @@ function onPositioningSquareClick(sq) {
     }
     
     // Select a piece on the board
-    if (existing && State.players[existing.color] === 'human') {
+    if (existing && isManualControl(existing.color)) {
         State.selectedSquare = square;
         sq.classList.add('selected');
         highlightValidSquares(existing.color);
@@ -248,7 +254,7 @@ function updatePositioningBoard() {
             span.className = 'piece';
             span.textContent = ICONS[p.color][p.piece];
             
-            if (State.players[p.color] === 'human') {
+            if (isManualControl(p.color)) {
                 span.draggable = true;
                 (function(piece, idx, sqName, clr) {
                     span.addEventListener('dragstart', function(e) {
@@ -307,7 +313,7 @@ function isPositionComplete(color) {
 function setupPositioningButtons() {
     $('auto-position').onclick = function() {
         ['white', 'black'].forEach(c => {
-            if (State.players[c] === 'human') {
+            if (isManualControl(c)) {
                 State.positions[c] = {};
                 autoPosition(c);
             }

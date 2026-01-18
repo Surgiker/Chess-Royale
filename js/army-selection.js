@@ -23,7 +23,8 @@ function initArmySelection() {
             item.querySelector('.minus').onclick = () => changeQty(color, piece, -1);
         });
         
-        if (State.players[color] === 'ai') {
+        // If AI and NOT manual setup, auto-select classic army
+        if (State.players[color] === 'ai' && !State.manualSetup) {
             setClassicArmy(color);
             State.armiesConfirmed[color] = true;
             panel.classList.add('hidden-selection');

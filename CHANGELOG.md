@@ -6,8 +6,7 @@ All notable changes to Chess Royale will be documented in this file.
 
 ### Added
 - **Chinese language support (中文)** — full translation of all game text
-- **Move animation** — pieces now visually slide from origin to destination square
-- **Replay last move button** — watch the last move animation again at any time
+- **Manual setup mode** — new checkbox option to manually configure armies and positioning for both sides, then watch AI vs AI battles
 - **Last move highlighting** — origin and destination squares of the last move are highlighted on the board
 
 ### Changed

@@ -19,6 +19,11 @@ function initSetup() {
         });
     });
     
+    // Manual setup checkbox
+    $('manual-setup').addEventListener('change', (e) => {
+        State.manualSetup = e.target.checked;
+    });
+    
     // Start game button
     $('start-game').addEventListener('click', () => {
         showScreen('army-screen');

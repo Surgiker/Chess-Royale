@@ -48,7 +48,7 @@ const TRANSLATIONS = {
         capturedByBlack: "Captured by Black:",
         nextMove: "Next Move",
         newGame: "New Game",
-        replayMove: "Replay Last Move",
+        manualSetup: "Manual setup for both sides",
         
         // End game modal
         gameOver: "Game Over",
@@ -107,7 +107,7 @@ const TRANSLATIONS = {
         capturedByBlack: "Catturati dal Nero:",
         nextMove: "Prossima Mossa",
         newGame: "Nuova Partita",
-        replayMove: "Rivedi Ultima Mossa",
+        manualSetup: "Setup manuale per entrambi",
         
         // End game modal
         gameOver: "Partita Terminata",
@@ -166,7 +166,7 @@ const TRANSLATIONS = {
         capturedByBlack: "黑方吃子：",
         nextMove: "下一步",
         newGame: "新游戏",
-        replayMove: "重播上一步",
+        manualSetup: "双方手动设置",
         
         // End game modal
         gameOver: "游戏结束",

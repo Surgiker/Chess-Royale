@@ -3,6 +3,7 @@
 const State = {
     players: { white: 'human', black: 'ai' },
     speed: 'step',
+    manualSetup: false,
     armies: { white: [], black: [] },
     armiesConfirmed: { white: false, black: false },
     cartQty: { 
@@ -17,6 +18,5 @@ const State = {
     captured: { white: [], black: [] },
     gameOver: false,
     thinking: false,
-    lastMove: null,
-    animating: false
+    lastMove: null
 };

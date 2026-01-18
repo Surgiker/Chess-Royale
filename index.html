@@ -55,6 +55,12 @@
                     </div>
                 </div>
                 
+                <div class="setup-section">
+                    <label class="manual-setup-option">
+                        <input type="checkbox" id="manual-setup"> <span data-i18n="manualSetup">Manual setup for both sides</span>
+                    </label>
+                </div>
+                
                 <button class="btn-primary" id="start-game" data-i18n="startGame">Start Game</button>
             </div>
         </div>
@@ -254,16 +260,15 @@
                         <h4 data-i18n="capturedByBlack">Captured by Black:</h4>
                         <div class="captured-list" id="black-captured"></div>
                     </div>
+                    <div class="game-buttons">
+                        <button class="control-btn" id="next-move" style="display:none;" data-i18n="nextMove">Next Move</button>
+                        <button class="control-btn" id="new-game" data-i18n="newGame">New Game</button>
+                    </div>
                 </div>
                 
                 <div class="board-container">
                     <div class="board-frame">
                         <div class="chessboard" id="game-board"></div>
-                    </div>
-                    <div class="game-controls" id="game-controls">
-                        <button class="control-btn" id="replay-move" style="display:none;" data-i18n="replayMove">Replay Last Move</button>
-                        <button class="control-btn" id="next-move" style="display:none;" data-i18n="nextMove">Next Move</button>
-                        <button class="control-btn" id="new-game" data-i18n="newGame">New Game</button>
                     </div>
                 </div>
             </div>
