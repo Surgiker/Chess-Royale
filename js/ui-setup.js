@@ -20,8 +20,12 @@ function initSetup() {
     });
     
     // Manual setup checkbox
-    $('manual-setup').addEventListener('change', (e) => {
-        State.manualSetup = e.target.checked;
+    const manualCheckbox = $('manual-setup');
+    manualCheckbox.addEventListener('change', function() {
+        State.manualSetup = this.checked;
+    });
+    manualCheckbox.addEventListener('click', function() {
+        State.manualSetup = this.checked;
     });
     
     // Start game button

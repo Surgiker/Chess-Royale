@@ -251,8 +251,28 @@ function setupGameButtons() {
         if (State.players[State.currentTurn] === 'ai' && !State.thinking) doAIMove();
     };
     
-    $('new-game').onclick = $('modal-new-game').onclick = function() {
-        $('game-end-modal').classList.remove('active');
-        showScreen('setup-screen');
+    $('new-game').onclick = function() {
+        resetToSetup();
     };
+    
+    $('modal-new-game').onclick = function() {
+        $('game-end-modal').classList.remove('active');
+        resetToSetup();
+    };
+}
+
+function resetToSetup() {
+    // Reset state
+    State.manualSetup = false;
+    State.armies = { white: [], black: [] };
+    State.armiesConfirmed = { white: false, black: false };
+    State.positions = { white: {}, black: {} };
+    State.lastMove = null;
+    State.gameOver = false;
+    State.thinking = false;
+    
+    // Reset UI
+    $('manual-setup').checked = false;
+    
+    showScreen('setup-screen');
 }

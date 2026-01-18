@@ -2,6 +2,22 @@
 
 All notable changes to Chess Royale will be documented in this file.
 
+## [2.2.0] - 2025-01-18
+
+### Added
+- **Version number in title** — displays "(v. 2.2)" next to the game title
+
+### Changed
+- **Improved turn indicator layout** — "Turn:" now on separate line from player info
+- **Game buttons moved to left panel** — "Next Move" and "New Game" now below captured pieces
+- **Better button spacing** — more visual separation between game control buttons
+
+### Fixed
+- **New Game button** — now properly resets all game state
+- **Manual setup checkbox** — improved event handling for better reliability
+
+---
+
 ## [2.0.0] - 2025-01-18
 
 ### Added

@@ -32,6 +32,11 @@ h1 {
     margin-bottom: 0.5rem;
     letter-spacing: 0.1em;
 }
+h1 .version {
+    font-size: 1rem;
+    font-weight: normal;
+    color: var(--wood-light);
+}
 
 .subtitle {
     text-align: center;
@@ -350,7 +355,7 @@ h1 {
 .game-buttons {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--gold-dim);
